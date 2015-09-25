@@ -69,7 +69,10 @@ copy_dot_drush '/.home-localdev'   # Drush overrides from local environment home
 
 # Copy Bash settings from artificial $HOME folder if available
 copy_dot_bash '/.home-localdev'
-mv  {.b,.dr,.p}* /.home-localdev ~ 2>/dev/null 
+mv  /.home-localdev/{.b,.dr,.p}*  ~ 2>/dev/null 
+
+# Copy scripts from artificial $HOME folder if available
+mv  /.home-localdev/bin/*  ~/bin/ 2>/dev/null
 
 echo "PHP5-FPM with environment variables"
 # Update php5-fpm with access to Docker environment variables
