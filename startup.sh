@@ -34,7 +34,7 @@ copy_dot_drush ()
 {
   local path="$1/.drush"
   if [ -d $path ]; then
-    echo "Copying Drush settigns in $path from host..."
+    echo "Copying Drush settings in $path from host..."
     cp -r $path ~
   fi
 }
@@ -53,6 +53,7 @@ copy_dot_acquia '/.home-b2d' # boot2docker (docker-compose)
 copy_dot_drush '/.home' # Generic
 copy_dot_drush '/.home-linux' # Linux (docker-compose)
 copy_dot_drush '/.home-b2d' # boot2docker (docker-compose)
+copy_dot_drush '/.home-localdev'   # Drush overrides from local environment home folder
 
 echo "PHP5-FPM with environment variables"
 # Update php5-fpm with access to Docker environment variables
