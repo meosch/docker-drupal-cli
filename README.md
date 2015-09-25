@@ -19,3 +19,5 @@ Also:
 - wget
 - zip
 - mysql-client
+
+Added folder to startup.sh to allow for Drush overrides by the local development environment. This is needed as to run drush sql-sync one alias must be local and different alias settings are need when running on the host compared to the container.
