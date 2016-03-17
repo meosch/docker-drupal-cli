@@ -68,9 +68,9 @@ ENV PATH /root/.composer/vendor/bin:$PATH
 RUN \
     # Drush 6,7 (default),8
     composer global require drush/drush:7.* && \
-    mkdir /root/drush6 && cd /root/drush6 && composer require drush/drush:6.* && \
+#    mkdir /root/drush6 && cd /root/drush6 && composer require drush/drush:6.* && \
     mkdir /root/drush8 && cd /root/drush8 && composer require drush/drush:dev-master --prefer-dist && \
-    echo "alias drush6='/root/drush6/vendor/bin/drush'" >> /root/.bashrc && \
+#    echo "alias drush6='/root/drush6/vendor/bin/drush'" >> /root/.bashrc && \
     echo "alias drush7='/root/.composer/vendor/bin/drush'" >> /root/.bashrc && \
     echo "alias drush8='/root/drush8/vendor/bin/drush'" >> /root/.bashrc && \
     # Drupal Console
