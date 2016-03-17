@@ -60,11 +60,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Composer
-RUN curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-# Add Composer bin directory to PATH
-ENV PATH /root/.composer/vendor/bin:$PATH
-
 ENV DRUSH_VERSION 7.*
 ENV DRUPAL_CONSOLE_VERSION 0.10.1
 
