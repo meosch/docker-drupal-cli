@@ -62,6 +62,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 
 # Composer
 RUN curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Add Composer bin directory to PATH
 ENV PATH /root/.composer/vendor/bin:$PATH
 
 RUN \
