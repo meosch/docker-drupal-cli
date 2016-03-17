@@ -74,14 +74,6 @@ RUN curl -sSL https://getcomposer.org/installer | php && \
     chmod +x /usr/local/bin/drupal
 ENV PATH /home/docker/.composer/vendor/bin:$PATH
 
-# Drush modules
-RUN drush dl registry_rebuild-7.x-2.2 && \
-    drush dl coder --destination=/home/docker/.drush && \
-    drush cc drush && \# Drush modules
-    drush dl registry_rebuild-7.x-2.2 && \
-    drush dl coder --destination=/home/docker/.drush && \
-    drush cc drush && \
-
 ## PHP settings
 RUN mkdir -p /var/www/docroot && \
     # PHP-FPM settings
