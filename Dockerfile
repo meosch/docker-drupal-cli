@@ -65,19 +65,27 @@ RUN curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/loca
 # Add Composer bin directory to PATH
 ENV PATH /root/.composer/vendor/bin:$PATH
 
-RUN \
-    # Drush 6,7 (default),8
-    composer global require drush/drush:7.* && \
-#    mkdir /root/drush6 && cd /root/drush6 && composer require drush/drush:6.* && \
-    mkdir /root/drush8 && cd /root/drush8 && composer require drush/drush:dev-master --prefer-dist && \
-#    echo "alias drush6='/root/drush6/vendor/bin/drush'" >> /root/.bashrc && \
-    echo "alias drush7='/root/.composer/vendor/bin/drush'" >> /root/.bashrc && \
-    echo "alias drush8='/root/drush8/vendor/bin/drush'" >> /root/.bashrc && \
+ENV DRUSH_VERSION 7.*
+ENV DRUPAL_CONSOLE_VERSION 0.10.1
+
+    # Composer
+RUN curl -sSL https://getcomposer.org/installer | php && \
+    mv composer.phar /usr/local/bin/composer && \
+    # Drush 8 (default)
+    curl -sSL https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar -o /usr/local/bin/drush && \
+    chmod +x /usr/local/bin/drush && \
     # Drupal Console
-    curl -sSL http://drupalconsole.com/installer | php && \
-    mv console.phar /usr/local/bin/drupal && \
-    # Drush modules
-    drush dl registry_rebuild
+    curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/$DRUPAL_CONSOLE_VERSION/drupal.phar -o /usr/local/bin/drupal && \
+    chmod +x /usr/local/bin/drupal
+ENV PATH /home/docker/.composer/vendor/bin:$PATH
+
+# Drush modules
+RUN drush dl registry_rebuild-7.x-2.2 && \
+    drush dl coder --destination=/home/docker/.drush && \
+    drush cc drush && \# Drush modules
+    drush dl registry_rebuild-7.x-2.2 && \
+    drush dl coder --destination=/home/docker/.drush && \
+    drush cc drush && \
 
 ## PHP settings
 RUN mkdir -p /var/www/docroot && \
