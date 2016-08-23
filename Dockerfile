@@ -21,12 +21,24 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     rsync \
     ca-certificates \
     apt-transport-https \
+    sudo \
     locales \
     mc \
     supervisor \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN \
+# Install gosu and give access to the users group to use it. gosu will be used to run services as a different user. From blinkreaction/docker-drupal-base - docker-drupal-base/jessie/Dockerfile
+curl -sSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
+    chown root:users /usr/local/bin/gosu && \
+    chmod +sx /usr/local/bin/gosu
+
+RUN \
+    # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
+    useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
+    echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Set timezone and locale.
 RUN dpkg-reconfigure locales && \
@@ -82,6 +94,7 @@ RUN mkdir -p /var/www/docroot && \
     sed -i 's/upload_max_filesize = .*/upload_max_filesize = 500M/' /etc/php5/fpm/php.ini && \
     sed -i 's/post_max_size = .*/post_max_size = 500M/' /etc/php5/fpm/php.ini && \
     sed -i '/error_log = php_errors.log/c\error_log = \/dev\/stdout/' /etc/php5/fpm/php.ini && \
+    sed -i '/user = /c user = docker' /etc/php5/fpm/pool.d/www.conf && \
     sed -i '/listen = /c\listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
     sed -i '/listen.allowed_clients/c\;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
     sed -i '/;daemonize = yes/c\daemonize = no' /etc/php5/fpm/php-fpm.conf && \
@@ -106,8 +119,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
     ruby1.9.1-full \
     rlwrap \
-    make \
-    gcc \
+    build-essential \
     nodejs \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean &&\
@@ -122,15 +134,21 @@ ENV BUNDLE_PATH .bundler
 # Grunt, Bower
 RUN npm install -g grunt-cli bower
 
-WORKDIR /var/www
+# All further RUN commands will run as the "docker" user
+USER docker
 
 # Copy configs and scripts
-COPY config/.ssh /root/.ssh
-COPY config/.drush /root/.drush
+COPY config/.ssh /home/docker/.ssh
+COPY config/.drush /home/docker/.drush
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
+# Fix permissions after COPY
+RUN sudo chown -R docker:users /home/docker
+
 EXPOSE 9000
+
+WORKDIR /var/www
 
 # Set TERM so text editors/etc. can be used
 ENV TERM xterm
@@ -142,4 +160,4 @@ ENV SSH_KEY_NAME id_rsa
 ENTRYPOINT ["/opt/startup.sh"]
 
 # By default, launch supervisord to keep the container running.
-CMD /usr/bin/supervisord -n
+CMD ["gosu", "root", "supervisord"]

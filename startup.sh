@@ -87,19 +87,8 @@ cp  /.home-localdev/bin/*  ~/bin/ 2>/dev/null
 # so this links to the authorized_keys file in the <docker_projects_home_folder>.
 copy_authorized_keys '/.home-localdev/.ssh'
 
-echo "PHP5-FPM with environment variables"
-# Update php5-fpm with access to Docker environment variables
-ENV_CONF=/etc/php5/fpm/pool.d/env.conf
-echo '[www]' > $ENV_CONF
-for var in $(env | awk -F= '{print $1}'); do
-	# Skip empty/bad variables as this will blow up PHP FPM.
-	if [[ ${!var} == '' || ${var} == '_' ]]; then
-		echo "Skipping empty/bad variable: ${var}"
-	else
-		echo "Adding variable: ${var} = ${!var}"
-		echo "env[${var}] = ${!var}" >> $ENV_CONF
-	fi
-done
+# Reset home directory ownership
+sudo chown $(id -u):$(id -g) -R ~
 
 # Execute passed CMD arguments
 exec "$@"
