@@ -34,7 +34,7 @@ copy_dot_drush (){
   local path="$1/.drush"
   if [ -d $path ]; then
     echo "Copying Drush settings in $path from host..."
-    cp -r $path ~
+    rsync -r $path ~ --exclude=cache
   fi
 }
 

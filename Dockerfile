@@ -72,20 +72,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENV DRUSH_VERSION 7.*
-ENV DRUPAL_CONSOLE_VERSION 0.10.1
-
-    # Composer
-RUN curl -sSL https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer && \
-    # Drush 8 (default)
-    curl -sSL https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar -o /usr/local/bin/drush && \
-    chmod +x /usr/local/bin/drush && \
-    # Drupal Console
-    curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/$DRUPAL_CONSOLE_VERSION/drupal.phar -o /usr/local/bin/drupal && \
-    chmod +x /usr/local/bin/drupal
-ENV PATH /home/docker/.composer/vendor/bin:$PATH
-
 ## PHP settings
 RUN mkdir -p /var/www/docroot && \
     # PHP-FPM settings
@@ -134,8 +120,23 @@ ENV BUNDLE_PATH .bundler
 # Grunt, Bower
 RUN npm install -g grunt-cli bower
 
+# Install Composer.
+RUN curl -sS https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer
+
+
 # All further RUN commands will run as the "docker" user
 USER docker
+
+# Fix permissions
+RUN gosu root chown -R docker:users /home/docker
+
+# Install Drush and Drupal Console
+ENV PATH /home/docker/.composer/vendor/bin:$PATH
+# Install Drupal Console.
+RUN composer global require drush/drush:7.*
+RUN composer global require drupal/console:@stable
+RUN composer global update
 
 # Copy configs and scripts
 COPY config/.ssh /home/docker/.ssh
@@ -144,7 +145,7 @@ COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
 # Fix permissions after COPY
-RUN sudo chown -R docker:users /home/docker
+RUN gosu root chown -R docker:users /home/docker
 
 EXPOSE 9000
 
