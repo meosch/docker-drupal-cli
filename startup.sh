@@ -34,7 +34,7 @@ copy_dot_acquia ()
   if [ -f $path ]; then
     echo "Copying Acquia Cloud API settings in $path from host..."
     mkdir -p ~/.acquia
-    cp $path ~/.acquia
+    sudo cp $path ~/.acquia
   fi
 }
 
@@ -45,7 +45,7 @@ copy_dot_drush ()
   local path="$1/.drush"
   if [ -d $path ]; then
     echo "Copying Drush settigns in $path from host..."
-    cp -r $path ~
+    sudo cp -r $path ~
   fi
 }
 
